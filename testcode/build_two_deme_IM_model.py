@@ -85,6 +85,8 @@ if __name__ == "__main__":
         "Nref": args.Nref,
         "genome_length": 1.0,
         "final_deme_sizes": finalNs,
+        "theta": args.theta,
+        "mutations_are_neutral": args.gamma is None,
     }
 
     with open(args.outdir + "/model.pickle", "wb") as f:
