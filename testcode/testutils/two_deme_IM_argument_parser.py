@@ -49,12 +49,6 @@ def make_model_builder_parser():
         help="Migration rates, scaled by 2*Nref.",
     )
     optional.add_argument(
-        "--nsam",
-        type=int,
-        default=15,
-        help="Number of diploids to sample from each deme",
-    )
-    optional.add_argument(
         "--theta",
         type=float,
         default=1.0,
@@ -82,6 +76,12 @@ def make_model_runner_parser():
     )
     parser.add_argument(
         "--nworkers", type=int, default=None, help="Number of worker processes"
+    )
+    parser.add_argument(
+        "--nsam",
+        type=int,
+        default=None,
+        help="Number of diploids to sample from each deme",
     )
 
     return parser

@@ -1,0 +1,6 @@
+tskit==0.2.3
+snakemake
+cython # for moments
+mpmath # for moments
+-e git+https://bitbucket.org/simongravel/moments.git#egg=moments
+seaborn
