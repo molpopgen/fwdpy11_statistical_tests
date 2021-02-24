@@ -1,6 +1,8 @@
-tskit==0.2.3
+tskit>=0.3.4
 snakemake
+networkx # for html reports
+pygraphviz # for html reports
 cython # for moments
 mpmath # for moments
--e git+https://bitbucket.org/simongravel/moments.git#egg=moments
+git+https://bitbucket.org/simongravel/moments.git
 seaborn
