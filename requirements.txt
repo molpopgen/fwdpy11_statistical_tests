@@ -2,6 +2,8 @@ tskit>=0.3.4
 snakemake
 networkx # for html reports
 pygraphviz # for html reports
+jinja2 # for html reports
+pygments # for html reports
 cython # for moments
 mpmath # for moments
 git+https://bitbucket.org/simongravel/moments.git

@@ -11,7 +11,7 @@ import seaborn as sns
 def plot_fst(fst, moments_fs, ax):
     moments_Fst = moments_fs.Fst()
     d = sns.distplot(fst, ax=ax)
-    ax.set_title(f"Mean from sims = {fst.mean():.4f}. Expectation = {moments_Fst:.4f}.")
+    ax.set_title(f"Mean from sims = {fst.mean():.4f}.\nExpectation = {moments_Fst:.4f}.")
     ax.set_xlabel(r"$F_{st}$")
     ax.axvline(moments_fs.Fst())
 

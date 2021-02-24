@@ -1,3 +1,5 @@
+configfile: "config.yaml"
+
 rule all:
     input:
         # Output from "rules/two_deme_IM_asymmetric.smk"
