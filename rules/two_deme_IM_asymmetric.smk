@@ -29,6 +29,8 @@ rule run_two_deme_IM_asymmetric_mig:
     input:
         "testcode/run_two_deme_IM_model.py",
         "output/demographic_models/two_deme_IM_asymmetric_migration/model.pickle",
+    params:
+        nreps=expand("{nreps}", nreps=config["im_model_nreps"])
     output:
         "output/demographic_models/two_deme_IM_asymmetric_migration/fst.np",
         "output/demographic_models/two_deme_IM_asymmetric_migration/deme0.np",
@@ -39,7 +41,7 @@ rule run_two_deme_IM_asymmetric_mig:
         """
         python3 testcode/run_two_deme_IM_model.py \
             --infile output/demographic_models/two_deme_IM_asymmetric_migration/model.pickle \
-            --outdir output/demographic_models/two_deme_IM_asymmetric_migration --nreps 128 --nworkers {threads} \
+            --outdir output/demographic_models/two_deme_IM_asymmetric_migration --nreps {params.nreps} --nworkers {threads} \
             --num_subsamples 1 --nsam 15
         """
 

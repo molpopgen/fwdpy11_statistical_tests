@@ -33,12 +33,14 @@ rule run_two_deme_IM_symmetric_mig:
         "output/demographic_models/two_deme_IM_symmetric_migration/deme0.np",
         "output/demographic_models/two_deme_IM_symmetric_migration/deme1.np",
         "output/demographic_models/two_deme_IM_symmetric_migration/caption.rst",
+    params:
+        nreps=expand("{nreps}", nreps=config["im_model_nreps"])
     threads: 64
     run:
         shell("""
         python3 testcode/run_two_deme_IM_model.py \
         --infile output/demographic_models/two_deme_IM_symmetric_migration/model.pickle \
-        --outdir output/demographic_models/two_deme_IM_symmetric_migration --nreps 128 --nworkers {threads} \
+        --outdir output/demographic_models/two_deme_IM_symmetric_migration --nreps {params.nreps} --nworkers {threads} \
         --num_subsamples 1 --nsam 15
         """)
 
