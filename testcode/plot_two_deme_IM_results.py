@@ -52,9 +52,9 @@ if __name__ == "__main__":
     args = parser.parse_args(sys.argv[1:])
 
     # Results from the foward sim
-    fst = np.memmap(args.workdir + "/fst.np", np.float)
-    deme0 = np.memmap(args.workdir + "/deme0.np", np.float)
-    deme1 = np.memmap(args.workdir + "/deme1.np", np.float)
+    fst = np.memmap(args.workdir + "/fst.np", np.float64)
+    deme0 = np.memmap(args.workdir + "/deme0.np", np.float64)
+    deme1 = np.memmap(args.workdir + "/deme1.np", np.float64)
 
     # moments reults
     moments_fs = moments.Spectrum.from_file(args.workdir + "/moments.fs")
