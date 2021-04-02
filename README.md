@@ -1,27 +1,25 @@
 # Intro
 
+## Test layout
+
+Each set of tests are in their own subdirectory.
+Each subdirectory contains a `README` file.
+The tests are automated with [`snakemake`](https://snakemake.readthedocs.io/en/stable/).
+
 ## Running the tests
 
-### Docker
+The tests are meant to be run in a Docker container.
+We do this so that we don't have to worry about system installs, and Python dependencies are correctly handled for each set of tests.
+To run the tests, execute the `generate_report.sh` script found in the test subdirectory.
+The output will be an `html` report.
 
-```sh
-docker build --build-arg cores=12 . -t stat_tests
-```
+### Why not virtual environments?
 
-To run the suite against the latest stable release:
+`snakemake` requires system libraries for report generation.
+We don't want to have to worry about that on every possible system, so we use an Ubuntu environment for all test runs via Docker.
 
-```sh
-docker build --build-arg cores=12 --build-arg tag=stable . -t stat_tests
-```
-
-#### Copying results back from Docker
-
-```sh
-docker run -v $PWD:/mnt stat_tests cp report.html /mnt/report_tagname.html
-```
-
-#### Changing default parameters.
+### Changing default parameters.
 
 * Copy `config.yaml` to `myconfig.yaml`
 * Change values in `myconfig.yaml`
-* Execute the `docker build` step.
+* Execute the report generation step.
