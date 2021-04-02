@@ -17,10 +17,14 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -qq -y install grap
   python3-wheel \
   python3-setuptools \
   && rm -rf /var/lib/apt/lists/* \
-  && rm -rf output
+  && rm -rf output \
+  && useradd testuser
 
-RUN python3 -m pip install -r requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 RUN snakemake -j $cores
 
-RUN snakemake --report report.html
+RUN snakemake --report report.html \
+  && chown -R testuser:testuser report.html
+
+USER testuser
