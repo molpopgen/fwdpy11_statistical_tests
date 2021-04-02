@@ -1,5 +1,5 @@
 #!/bin/sh
 
-docker build --build-arg cores=12 --build-arg tag=stable . -t im_lowlevel
-docker run -v $PWD:/mnt im_lowlevel cp report.html /mnt/report.html
-# docker image rm -f im_lowlevel
+docker build --build-arg tag=$TAG . -t im_lowlevel
+docker run -v $PWD:/mnt im_lowlevel /bin/bash -c "snakemake -j $CORES && snakemake --report /mnt/report.html"
+docker image rm -f im_lowlevel

@@ -1,5 +1,4 @@
 ARG tag=latest
-ARG cores=6
 
 FROM molpopgen/fwdpy11:$tag
 
@@ -22,9 +21,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -qq -y install grap
 
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
-RUN snakemake -j $cores
-
-RUN snakemake --report report.html \
-  && chown -R testuser:testuser report.html
+# Make WORKDIR the $HOME for testuser
+RUN chown -R testuser:testuser /app \
+  && usermod -d /app testuser
 
 USER testuser
