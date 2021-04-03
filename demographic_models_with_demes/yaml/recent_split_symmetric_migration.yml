@@ -1,0 +1,20 @@
+description: A recent population split with symmetric migration.
+time_units: generations
+demes:
+- name: deme0
+  description: The ancestral deme
+  epochs:
+    - {start_size: 1000, end_time: 0}
+
+- name: deme1
+  description: The derived deme, 1/2 the size of the ancestral.
+  ancestors: [deme0]
+  start_time: 100
+  epochs:
+    - {start_size: 500, end_time: 0}
+migrations:
+- {demes: [deme0, deme1], rate: 1e-3}
+
+
+
+

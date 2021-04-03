@@ -1,0 +1,25 @@
+description: A recent population split followed by growth in derived deme.
+             At the time of the split, we change the label of the ancestral
+             population.  This is useful for cases where we want to know
+             after a simulation if a node was in the ancestral deme
+             vs that deme after the split.
+time_units: generations
+demes:
+- name: deme0
+  description: The ancestral deme
+  epochs:
+    - {start_size: 1000, end_time: 100}
+
+- name: deme1
+  description: The continuation of the ancestor
+  ancestors: [deme0]
+  epochs:
+    - {start_size: 1000, end_time: 0}
+ 
+- name: deme2
+  description: The derived deme, 1/2 the size of the ancestral.
+  ancestors: [deme0]
+  epochs:
+    - {start_size: 500, end_size: 1000, end_time: 0}
+ 
+
