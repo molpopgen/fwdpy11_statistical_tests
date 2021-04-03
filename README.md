@@ -13,6 +13,15 @@ We do this so that we don't have to worry about system installs, and Python depe
 To run the tests, execute the `generate_report.sh` script found in the test subdirectory.
 The output will be an `html` report.
 
+Proper test execution requires specifying the Docker image tag and the number of cores to use.
+The tag values must be one of `latest` or `stable`.
+
+For example:
+
+```sh
+TAG=latest CORES=12 bash generate_report.sh
+```
+
 ### Why not virtual environments?
 
 `snakemake` requires system libraries for report generation.
