@@ -30,7 +30,7 @@ rule run_two_deme_IM_asymmetric_mig:
         "testcode/run_two_deme_IM_model.py",
         "output/demographic_models/two_deme_IM_asymmetric_migration/model.pickle",
     params:
-        nreps=expand("{nreps}", nreps=config["im_model_nreps"])
+        nreps=expand("{nreps}", nreps=config["nreps"])
     output:
         "output/demographic_models/two_deme_IM_asymmetric_migration/fst.np",
         "output/demographic_models/two_deme_IM_asymmetric_migration/deme0.np",

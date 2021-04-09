@@ -34,7 +34,7 @@ rule run_two_deme_IM_symmetric_mig:
         "output/demographic_models/two_deme_IM_symmetric_migration/deme1.np",
         "output/demographic_models/two_deme_IM_symmetric_migration/caption.rst",
     params:
-        nreps=expand("{nreps}", nreps=config["im_model_nreps"])
+        nreps=expand("{nreps}", nreps=config["nreps"])
     threads: 64
     run:
         shell("""
