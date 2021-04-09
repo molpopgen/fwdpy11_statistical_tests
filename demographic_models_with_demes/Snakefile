@@ -1,0 +1,20 @@
+configfile: "config.yaml"
+
+def make_all_png_names():
+    import glob
+    import os
+    yml = glob.glob("yaml/*.yml")
+    return [os.path.basename(i).replace(".yml",".png") for i in yml]
+
+ALL_MODELS = make_all_png_names()
+
+rule generate_residuals_plot:
+    input: model="yaml/{model}.yml"
+    output: report('{model}.png')
+    threads: 64
+    params:
+        nreps=expand("{nreps}", nreps=config["nreps"]),
+    shell: 'python3 python/plot_model_residuals.py --yaml {input.model} --nreps {params.nreps} --nthreads {threads}' 
+
+rule all_models:
+    input: ALL_MODELS
