@@ -35,7 +35,7 @@ rule run_two_deme_IM_no_mig_very_recent_split:
         "output/demographic_models/two_deme_IM_no_migration_very_recent_split/deme1.np",
         "output/demographic_models/two_deme_IM_no_migration_very_recent_split/caption.rst",
     params:
-        nreps=expand("{nreps}", nreps=config["im_model_nreps"])
+        nreps=expand("{nreps}", nreps=config["nreps"])
     threads: 64
     shell:
         """
