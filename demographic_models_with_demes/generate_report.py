@@ -1,7 +1,29 @@
 import argparse
+import logging
 import os
 import sys
 import subprocess
+
+logging.basicConfig(
+    filename="logfile.txt",
+    filemode="w",
+    format="%(asctime)s %(levelname)s %(message)s",
+    datefmt="%H:%M:%S",
+    level=logging.DEBUG,
+)
+
+
+def handle_return_value(output, *, log=False):
+    if output.returncode != 0:
+        logging.error(output.stderr.decode("utf8").rstrip())
+        sys.exit(1)
+    elif log is True:
+        stdout = output.stdout.decode("utf8").rstrip()
+        if len(stdout) > 0:
+            logging.info(f"STDOUT:\n{stdout}")
+        stderr = output.stderr.decode("utf8").rstrip()
+        if len(stderr) > 0:
+            logging.info(f"STDERR:\n{stderr}")
 
 
 def make_parser():
@@ -41,9 +63,9 @@ if __name__ == "__main__":
     else:
         tag = args.tag
 
-    sys.stderr.write(f"Building base docker image demes_statistical_tests:{tag}\n")
+    logging.info(f"Building temporary docker image demes_statistical_tests:{tag}.")
 
-    subprocess.run(
+    output = subprocess.run(
         [
             "docker",
             "build",
@@ -52,9 +74,12 @@ if __name__ == "__main__":
             ".",
             "-t",
             f"demes_statistical_tests:{tag}",
-        ]
+        ],
+        capture_output=True,
     )
-    sys.stderr.write("Running Snakefile.\n")
+    handle_return_value(output)
+
+    logging.info("Running Snakefile.")
 
     local_folder = os.getcwd() + ":/mnt"
 
@@ -74,7 +99,7 @@ if __name__ == "__main__":
         ]
     )
 
-    subprocess.run(
+    output = subprocess.run(
         [
             "docker",
             "run",
@@ -84,7 +109,14 @@ if __name__ == "__main__":
             "/bin/bash",
             "-c",
             f'"{snakemake_cmd}"',
-        ]
+        ],
+        capture_output=True,
     )
+    handle_return_value(output, log=True)
 
-    subprocess.run(["docker", "image", "rm", "-f", f"im_lowlevel:{tag}"])
+    logging.info(f"Removing temporary docker image demes_statistical_tests:{tag}.")
+    output = subprocess.run(
+        ["docker", "image", "rm", "-f", f"im_lowlevel:{tag}"], capture_output=True
+    )
+    handle_return_value(output)
+    logging.info("Done!")

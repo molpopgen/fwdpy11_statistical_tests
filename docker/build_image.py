@@ -1,6 +1,15 @@
 import argparse
+import logging
 import sys
 import subprocess
+
+logging.basicConfig(
+    filename="logfile.txt",
+    filemode="w",
+    format="%(asctime)s %(levelname)s %(message)s",
+    datefmt="%H:%M:%S",
+    level=logging.DEBUG,
+)
 
 
 def make_parser():
@@ -28,9 +37,9 @@ if __name__ == "__main__":
     else:
         tag = args.tag
 
-    sys.stderr.write(f"Building base docker image fwdpy11_statistical_tests:{tag}\n")
+    logging.info(f"Building base docker image fwdpy11_statistical_tests:{tag}")
 
-    subprocess.run(
+    output = subprocess.run(
         [
             "docker",
             "build",
@@ -39,5 +48,11 @@ if __name__ == "__main__":
             ".",
             "-t",
             f"fwdpy11_statistical_tests:{tag}",
-        ]
+        ],
+        capture_output=True,
     )
+    if output.returncode != 0:
+        logging.error(output.stderr.decode("utf8").rstrip())
+        sys.exit(1)
+
+    logging.info("Finished building base docker image.")
