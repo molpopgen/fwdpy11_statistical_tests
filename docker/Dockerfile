@@ -6,17 +6,29 @@ WORKDIR /app
 
 COPY . /app
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -qq -y install graphviz \
+RUN sed -i '/^#\sdeb-src /s/^#//' "/etc/apt/sources.list" \
+  && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -qq -y install graphviz \
   libgraphviz-dev \
-  imagemagick \
   python3 \
   python3-pip \
   python3-wheel \
   python3-setuptools \
+  wget \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf output \
   && useradd testuser \
   && apt-get clean
+
+# install imagemagick 7 from source
+RUN wget https://download.imagemagick.org/ImageMagick/download/ImageMagick-7.1.0-19.tar.gz \
+  && tar xzf ImageMagick-7.1.0-19.tar.gz \
+  && cd ImageMagick-7.1.0-19 \ 
+  && ./configure --enable-shared \ 
+  && make -j 4 \
+  && make install \ 
+  && cd .. \
+  && rm -rf ImageMagick* \
+  && ldconfig
 
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
