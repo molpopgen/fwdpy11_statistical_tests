@@ -7,5 +7,6 @@ pygments # for html reports
 cython # for moments
 mpmath # for moments
 seaborn
+pandas
 git+https://bitbucket.org/simongravel/moments.git
 git+https://github.com/grahamgower/demesdraw.git
