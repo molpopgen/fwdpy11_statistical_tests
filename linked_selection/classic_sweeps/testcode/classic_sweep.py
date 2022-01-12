@@ -13,7 +13,7 @@ import pandas as pd
 ALPHAS = [1e3]
 N = 1000
 L = 2000  # NOTE: may need/want a much larger value
-DBNAME = "output/sfs.sqlite3"
+DBNAME = "output/data.sqlite3"
 
 
 def make_parser():
@@ -119,9 +119,7 @@ if __name__ == "__main__":
 
     mean_afs = np.zeros(21)
 
-    nreps = 250
-
-    for i in range(nreps):
+    for i in range(args.nreps):
         msp_seed = np.random.randint(0, np.iinfo(np.uint32).max)
         while msp_seed in used_msprime_seeds:
             msp_seed = np.random.randint(0, np.iinfo(np.uint32).max)
