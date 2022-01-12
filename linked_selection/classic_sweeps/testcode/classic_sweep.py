@@ -1,6 +1,7 @@
 import argparse
 import concurrent.futures
 import sqlite3
+import os
 import sys
 
 import fwdpy11
@@ -8,11 +9,11 @@ import fwdpy11.conditional_models
 import msprime
 import numpy as np
 import pandas as pd
-import tskit
 
 ALPHAS = [1e3]
 N = 1000
 L = 2000  # NOTE: may need/want a much larger value
+DBNAME = "output/sfs.sqlite3"
 
 
 def make_parser():
@@ -131,6 +132,9 @@ if __name__ == "__main__":
             fp11_seed = np.random.randint(0, np.iinfo(np.uint32).max)
         fp11_seeds.append(fp11_seed)
 
+    if os.path.exists(DBNAME):
+        os.remove(DBNAME)
+
     with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
         futures = {
             executor.submit(run_sim, 100.0, 500, m, f)
@@ -138,7 +142,12 @@ if __name__ == "__main__":
         }
         for future in concurrent.futures.as_completed(futures):
             afs = future.result()
-            mean_afs += afs
-
-    mean_afs /= nreps
-    print(mean_afs)
+            df = pd.DataFrame(
+                {
+                    "eta": [i + 1 for i in range(19)],
+                    "count": afs[1:-1],
+                    "alpha": [100.0] * 19,
+                }
+            )
+            conn = sqlite3.connect(DBNAME)
+            df.to_sql("sfs", conn, index=False, if_exists="append")
