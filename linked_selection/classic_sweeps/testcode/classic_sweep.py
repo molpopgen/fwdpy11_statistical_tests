@@ -30,6 +30,10 @@ def make_parser():
     )
 
     parser.add_argument(
+        "--ncores", type=int, default=-1, help="Number of cores/processes to use"
+    )
+
+    parser.add_argument(
         "--num_recrates",
         "-r",
         default=10,
@@ -133,7 +137,7 @@ if __name__ == "__main__":
     if os.path.exists(DBNAME):
         os.remove(DBNAME)
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=args.ncores) as executor:
         futures = {
             executor.submit(run_sim, 100.0, 500, m, f)
             for m, f in zip(msprime_seeds, fp11_seeds)
