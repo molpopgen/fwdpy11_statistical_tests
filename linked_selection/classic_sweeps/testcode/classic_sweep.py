@@ -102,12 +102,7 @@ def run_sim(rho, alpha, msprime_seed, fwdpy11_seed):
         random_seed=msprime_seed,
     )
 
-    # pop = fwdpy11.DiploidPopulation(N, L)
-
-    # fwdpy11.evolvets(fwdpy11.GSLrng(fwdpy11_seed), pop, params, 100)
-
     pop = fwdpy11.DiploidPopulation.create_from_tskit(ts)
-    # fwdpy11.evolvets(fwdpy11.GSLrng(fwdpy11_seed), pop, params, 100)
 
     assert pop.N == N
     mutation_data = fwdpy11.conditional_models.NewMutationParameters(
@@ -142,7 +137,6 @@ def run_sim(rho, alpha, msprime_seed, fwdpy11_seed):
         / 4.0
         / float(N)
     )[1]
-    # print(afs)
     return afs
 
 
