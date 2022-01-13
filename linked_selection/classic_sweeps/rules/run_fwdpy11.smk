@@ -4,8 +4,9 @@ rule make_database:
     threads: 64
     params:
         nreps=expand("{nreps}", nreps=config["nreps"]),
+        popsize=expand("{popsize}", popsize=config["popsize"]),
     shell:
         """
-        python3 testcode/classic_sweep.py --nreps {params.nreps} --ncores {threads}
+        python3 testcode/classic_sweep.py --popsize {params.popsize} --nreps {params.nreps} --ncores {threads}
         """
 

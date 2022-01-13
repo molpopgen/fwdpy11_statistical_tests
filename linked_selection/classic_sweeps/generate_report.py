@@ -39,6 +39,10 @@ def make_parser():
         help="The fwdpy11 version tag.  This will be used to build a new image based on the local base image for the specified version. If 'None', will default to 'stable'",
     )
     parser.add_argument(
+        "--popsize", "-N", type=int, default=1000, help="Diploid population size"
+    )
+
+    parser.add_argument(
         "--nreps",
         "-n",
         default=8,
@@ -90,6 +94,8 @@ if __name__ == "__main__":
             str(args.cores),
             "--config",
             f"nreps={args.nreps}",
+            "--config",
+            f"popsize={args.popsize}",
             "&&",
             "snakemake",
             "--report",

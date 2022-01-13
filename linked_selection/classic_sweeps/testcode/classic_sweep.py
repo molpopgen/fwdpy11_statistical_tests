@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 
 ALPHAS = [1e3]
-N = 1000
 L = 2000  # NOTE: may need/want a much larger value
 DBNAME = "output/data.sqlite3"
 
@@ -57,6 +56,10 @@ def make_parser():
     )
 
     parser.add_argument(
+        "--popsize", "-N", type=int, default=1000, help="Diploid population size"
+    )
+
+    parser.add_argument(
         "--nreps",
         default=-1,
         type=int,
@@ -77,7 +80,7 @@ def make_parser():
     return parser
 
 
-def run_sim(rho, alpha, msprime_seed, fwdpy11_seed):
+def run_sim(N, rho, alpha, msprime_seed, fwdpy11_seed):
     pdict = {
         "recregions": [
             fwdpy11.PoissonInterval(0, L // 2, rho / 4 / N, discrete=True),
@@ -169,7 +172,7 @@ if __name__ == "__main__":
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=args.ncores) as executor:
         futures = {
-            executor.submit(run_sim, 100.0, 500, m, f)
+            executor.submit(run_sim, args.popsize, 100.0, 500, m, f)
             for m, f in zip(msprime_seeds, fp11_seeds)
         }
         for future in concurrent.futures.as_completed(futures):
