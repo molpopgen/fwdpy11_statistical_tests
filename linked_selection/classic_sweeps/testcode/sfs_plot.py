@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 import sqlite3
 import sys
 
@@ -11,17 +12,9 @@ if __name__ == "__main__":
     output = sys.argv[2]
     df = pd.read_sql("select * from sfs", conn)
 
-    df = df.groupby(["eta", "alpha"]).mean().reset_index()
+    df = df.groupby(["eta", "alpha","rho"]).mean().reset_index()
 
-    # print(df)
-    # print(type(df))
-
-    fig = plt.Figure()
-    ax = fig.add_subplot()
-    # print(df.eta)
-    # print(df.count)
-    plt.plot(df.eta, df["count"])
-
-    # print(output)
+    g = sns.FacetGrid(df,row="alpha",column="row", margin_titles=True)
+    g.map(sns.scatterplot, "eta", "count")
 
     plt.savefig(output)
