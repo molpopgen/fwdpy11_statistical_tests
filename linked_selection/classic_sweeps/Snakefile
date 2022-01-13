@@ -3,7 +3,7 @@ configfile: "config.yaml"
 rule all:
     input:
         "output/data.sqlite3",
-        # "output/sfs.png",
+        "output/sfs.png",
 
 include: "rules/run_fwdpy11.smk"
-# include: "rules/sfs_plot.smk"
+include: "rules/sfs_plot.smk"
