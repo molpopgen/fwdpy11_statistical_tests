@@ -5,5 +5,5 @@ rule all:
         "output/data.sqlite3",
         # "output/sfs.png",
 
-include: "rules/make_database.smk"
+include: "rules/run_fwdpy11.smk"
 # include: "rules/sfs_plot.smk"
