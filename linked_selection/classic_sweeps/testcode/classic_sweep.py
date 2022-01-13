@@ -1,4 +1,6 @@
 import argparse
+from typing import List
+from dataclasses import dataclass, field
 import concurrent.futures
 import sqlite3
 import os
@@ -14,6 +16,38 @@ ALPHAS = [1e3]
 N = 1000
 L = 2000  # NOTE: may need/want a much larger value
 DBNAME = "output/data.sqlite3"
+
+
+@dataclass
+class ForwardSimDataArrays:
+    # Arrays to store data
+    eta: List[int] = field(default_factory=list)
+    count: List[float] = field(default_factory=list)
+    alpha: List[float] = field(default_factory=list)
+
+    def len(self):
+        return len(self.eta)
+
+    def to_df(self):
+        df = pd.DataFrame({"eta": self.eta, "count": self.count, "alpha": self.alpha})
+        return df
+
+    def clear(self):
+        self.eta.clear()
+        self.count.clear()
+        self.alpha.clear()
+
+    def dump(self, dbname):
+        conn = sqlite3.connect(dbname)
+        df = self.to_df()
+        df.to_sql("sfs", conn, index=False, if_exists="append")
+        self.clear()
+
+    def extend(self, sfs, alpha):
+        n = len(sfs) - 2
+        self.eta.extend([i + 1 for i in range(n)])
+        self.alpha.extend([alpha] * n)
+        self.count.extend(sfs[1:-1].tolist())
 
 
 def make_parser():
@@ -137,6 +171,8 @@ if __name__ == "__main__":
     if os.path.exists(DBNAME):
         os.remove(DBNAME)
 
+    arrays = ForwardSimDataArrays()
+
     with concurrent.futures.ProcessPoolExecutor(max_workers=args.ncores) as executor:
         futures = {
             executor.submit(run_sim, 100.0, 500, m, f)
@@ -144,12 +180,10 @@ if __name__ == "__main__":
         }
         for future in concurrent.futures.as_completed(futures):
             afs = future.result()
-            df = pd.DataFrame(
-                {
-                    "eta": [i + 1 for i in range(19)],
-                    "count": afs[1:-1],
-                    "alpha": [100.0] * 19,
-                }
-            )
-            conn = sqlite3.connect(DBNAME)
-            df.to_sql("sfs", conn, index=False, if_exists="append")
+            arrays.extend(afs, 100.0)
+
+            if arrays.len() > int(50e6):
+                arrays.dump(DBNAME)
+
+    if arrays.len() > 0:
+        arrays.dump(DBNAME)
