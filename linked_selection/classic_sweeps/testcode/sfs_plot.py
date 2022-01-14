@@ -12,9 +12,9 @@ if __name__ == "__main__":
     output = sys.argv[2]
     df = pd.read_sql("select * from sfs", conn)
 
-    df = df.groupby(["eta", "alpha","rho"]).mean().reset_index()
+    df = df.groupby(["eta", "alpha", "rho"]).mean().reset_index()
 
-    g = sns.FacetGrid(df,row="alpha",column="row", margin_titles=True)
+    g = sns.FacetGrid(df, row="alpha", col="rho", margin_titles=True)
     g.map(sns.scatterplot, "eta", "count")
 
     plt.savefig(output)

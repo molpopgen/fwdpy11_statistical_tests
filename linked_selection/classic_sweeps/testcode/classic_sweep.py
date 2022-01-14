@@ -33,7 +33,9 @@ class ForwardSimDataArrays:
         return len(self.eta)
 
     def to_df(self):
-        df = pd.DataFrame({"eta": self.eta, "count": self.count, "alpha": self.alpha})
+        df = pd.DataFrame(
+            {"eta": self.eta, "count": self.count, "alpha": self.alpha, "rho": self.rho}
+        )
         return df
 
     def clear(self):
@@ -70,7 +72,6 @@ def make_parser():
         description="Run a classic model of a sweep from a new mutation.  Analyze variation at a non-recombining region some scaled genetic distance away.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-
 
     parser.add_argument(
         "--popsize", "-N", type=int, default=1000, help="Diploid population size"
