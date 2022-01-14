@@ -94,7 +94,6 @@ if __name__ == "__main__":
             str(args.cores),
             "--config",
             f"nreps={args.nreps}",
-            "--config",
             f"popsize={args.popsize}",
             "&&",
             "snakemake",
