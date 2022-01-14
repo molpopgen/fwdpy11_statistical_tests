@@ -117,9 +117,9 @@ if __name__ == "__main__":
     )
     handle_return_value(output, log=True)
 
-    # logging.info(f"Removing temporary docker image classic_sweeps:{tag}.")
-    # output = subprocess.run(
-    #     ["docker", "image", "rm", "-f", f"classic_sweeps:{tag}"], capture_output=True
-    # )
-    # handle_return_value(output)
+    logging.info(f"Removing temporary docker image classic_sweeps:{tag}.")
+    output = subprocess.run(
+        ["docker", "image", "rm", "-f", f"classic_sweeps:{tag}"], capture_output=True
+    )
+    handle_return_value(output)
     logging.info("Done!")
