@@ -7,6 +7,6 @@ rule make_database:
         popsize=expand("{popsize}", popsize=config["popsize"]),
     shell:
         """
-        python3 testcode/classic_sweep.py --popsize {params.popsize} --nreps 12 --ncores {threads}
+        python3 testcode/classic_sweep.py --popsize {params.popsize} --nreps 1024 --ncores {threads}
         """
 

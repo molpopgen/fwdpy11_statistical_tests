@@ -12,10 +12,9 @@ import msprime
 import numpy as np
 import pandas as pd
 
-MIN_ALPHA = 10
-MAX_ALPHA = 10000
-MIN_RHO = 10
-MAX_RHO = 10000
+
+ALPHAS = [100.0, 500.0, 1000.0, 2500.0]
+RHOS = [10.0, 100.0, 1000.0]
 L = 2000  # NOTE: may need/want a much larger value
 
 DBNAME = "output/data.sqlite3"
@@ -34,7 +33,7 @@ class ForwardSimDataArrays:
 
     def to_df(self):
         df = pd.DataFrame(
-            {"eta": self.eta, "count": self.count, "alpha": self.alpha, "rho": self.rho}
+            {"eta": self.eta, "count": self.count, "2Ns": self.alpha, "4Nr": self.rho}
         )
         return df
 
@@ -88,27 +87,15 @@ def make_parser():
         "--ncores", type=int, default=-1, help="Number of cores/processes to use"
     )
 
-    parser.add_argument(
-        "--num_recrates",
-        "-r",
-        default=10,
-        help="Number of 4Nr values to use. These will be evenly-spaced from 10 to 10,000.",
-    )
-
-    parser.add_argument(
-        "--num-alphas",
-        type=int,
-        default=5,
-        help="Number of values of 2Ns to use.  Values will be evenly-spaced from 100 to 10,000.",
-    )
-
     return parser
 
 
 def run_sim(simparams: SimParams):
     pdict = {
         "recregions": [
-            fwdpy11.PoissonInterval(0, L // 2, rho / 4 / simparams.N, discrete=True),
+            fwdpy11.PoissonInterval(
+                0, L // 2, simparams.rho / 4 / simparams.N, discrete=True
+            ),
             fwdpy11.PoissonInterval(L // 2, L, 0.0, discrete=True),
         ],
         "nregions": [],
@@ -125,7 +112,7 @@ def run_sim(simparams: SimParams):
         population_size=simparams.N,
         sequence_length=L,
         recombination_rate=msprime.RateMap(
-            position=[0, L // 2, L], rate=[rho / 4 / simparams.N / L / 2, 0.0]
+            position=[0, L // 2, L], rate=[simparams.rho / 4 / simparams.N / L / 2, 0.0]
         ),
         random_seed=simparams.msprime_seed,
     )
@@ -135,7 +122,9 @@ def run_sim(simparams: SimParams):
     assert pop.N == simparams.N
     mutation_data = fwdpy11.conditional_models.NewMutationParameters(
         frequency=fwdpy11.conditional_models.AlleleCount(1),
-        data=fwdpy11.NewMutationData(effect_size=alpha / 2 / pop.N, dominance=1),
+        data=fwdpy11.NewMutationData(
+            effect_size=simparams.alpha / 2 / pop.N, dominance=1
+        ),
         position=fwdpy11.conditional_models.PositionRange(
             left=0.0, right=np.finfo(float).eps
         ),
@@ -168,19 +157,14 @@ def run_sim(simparams: SimParams):
     return afs, simparams
 
 
-if __name__ == "__main__":
-    parser = make_parser()
-    args = parser.parse_args(sys.argv[1:])
-
+def dispatch_work(args):
     used_fp11_seeds = {}
     used_msprime_seeds = {}
 
-    mean_afs = np.zeros(21)
-
     params = []
 
-    for rho in np.linspace(MIN_RHO, MAX_RHO, args.num_recrates + 1):
-        for alpha in np.linspace(MIN_ALPHA, MAX_ALPHA, args.num_recrates + 1):
+    for rho in RHOS:
+        for alpha in ALPHAS:
             for i in range(args.nreps):
                 msp_seed = np.random.randint(0, np.iinfo(np.uint32).max)
                 while msp_seed in used_msprime_seeds:
@@ -215,3 +199,10 @@ if __name__ == "__main__":
 
     if arrays.len() > 0:
         arrays.dump(DBNAME)
+
+
+if __name__ == "__main__":
+    parser = make_parser()
+    args = parser.parse_args(sys.argv[1:])
+
+    dispatch_work(args)
