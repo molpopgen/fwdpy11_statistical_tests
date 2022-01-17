@@ -1,4 +1,5 @@
 import argparse
+import random
 from typing import List
 from dataclasses import dataclass, field, asdict
 import concurrent.futures
@@ -167,6 +168,21 @@ def run_sim(simparams: SimParams):
     return afs, simparams
 
 
+def process_range(params):
+    arrays = ForwardSimDataArrays()
+    for param in params:
+        afs, simparams = run_sim(param)
+        i = 0
+        cumrho = 0
+        for rho, fs in zip(RHOS, afs):
+            if rho == 0.0:
+                cumrho += RHOS[i - 1]
+                arrays.extend(fs, cumrho, simparams)
+            i += 1
+
+    return arrays
+
+
 def dispatch_work(args):
     used_fp11_seeds = {}
     used_msprime_seeds = {}
@@ -191,28 +207,25 @@ def dispatch_work(args):
                 )
             )
 
+    # on average, balance the work load over processes
+    random.shuffle(params)
+
+    starts = np.arange(0, len(params), args.ncores)
+
+    stops = starts + args.ncores
+    stops[-1] = len(params)
+
     if os.path.exists(DBNAME):
         os.remove(DBNAME)
 
-    arrays = ForwardSimDataArrays()
-
     with concurrent.futures.ProcessPoolExecutor(max_workers=args.ncores) as executor:
-        futures = {executor.submit(run_sim, i) for i in params}
+        futures = {
+            executor.submit(process_range, i)
+            for i in np.array_split(params, args.ncores)
+        }
         for future in concurrent.futures.as_completed(futures):
-            afs, simparams = future.result()
-            i = 0
-            cumrho = 0
-            for rho, fs in zip(RHOS, afs):
-                if rho == 0.0:
-                    cumrho += RHOS[i - 1]
-                    arrays.extend(fs, cumrho, simparams)
-                i += 1
-
-            if arrays.len() > int(50e6):
-                arrays.dump(DBNAME)
-
-    if arrays.len() > 0:
-        arrays.dump(DBNAME)
+            arrays = future.result()
+            arrays.dump(DBNAME)
 
 
 if __name__ == "__main__":
