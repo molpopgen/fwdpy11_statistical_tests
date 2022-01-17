@@ -14,8 +14,13 @@ import pandas as pd
 
 
 ALPHAS = [100.0, 500.0, 1000.0, 2500.0]
-RHOS = [10.0, 100.0, 1000.0]
-L = 2000  # NOTE: may need/want a much larger value
+RHOS = [10.0, 0.0, 90.0, 0.0, 900.0, 0.0]
+LOCUS_LEN = 2000.0
+SEQLEN = len(RHOS) * LOCUS_LEN
+# L = 2000  # NOTE: may need/want a much larger value
+LEFTS = np.arange(0, SEQLEN, LOCUS_LEN)
+RIGHTS = LEFTS + LOCUS_LEN
+WINDOWS = [i for i in LEFTS] + [SEQLEN]
 
 DBNAME = "output/data.sqlite3"
 
@@ -49,18 +54,17 @@ class ForwardSimDataArrays:
         df.to_sql("sfs", conn, index=False, if_exists="append")
         self.clear()
 
-    def extend(self, sfs, simparams):
+    def extend(self, sfs, rho, simparams):
         n = len(sfs) - 2
         self.eta.extend([i + 1 for i in range(n)])
         self.alpha.extend([simparams.alpha] * n)
-        self.rho.extend([simparams.rho] * n)
+        self.rho.extend([rho] * n)
         self.count.extend(sfs[1:-1].tolist())
 
 
 @dataclass
 class SimParams:
     N: int
-    rho: float
     alpha: float
     msprime_seed: int
     fwdpy11_seed: int
@@ -91,13 +95,20 @@ def make_parser():
 
 
 def run_sim(simparams: SimParams):
-    pdict = {
-        "recregions": [
+    recregions = []
+    position = []
+    rate = []
+    for left, right, rho in zip(LEFTS, RIGHTS, RHOS):
+        recregions.append(
             fwdpy11.PoissonInterval(
-                0, L // 2, simparams.rho / 4 / simparams.N, discrete=True
-            ),
-            fwdpy11.PoissonInterval(L // 2, L, 0.0, discrete=True),
-        ],
+                int(left), int(right), rho / 4 / simparams.N, discrete=True
+            )
+        )
+        position.append(left)
+        rate.append(rho / 4 / simparams.N / (right - left))
+    position.append(SEQLEN)
+    pdict = {
+        "recregions": recregions,
         "nregions": [],
         "sregions": [],
         "gvalue": fwdpy11.Multiplicative(2.0),  # NOTE: scaling may be wrong
@@ -107,13 +118,12 @@ def run_sim(simparams: SimParams):
 
     params = fwdpy11.ModelParams(**pdict)
 
+    recombination_rate = msprime.RateMap(position=position, rate=rate)
     ts = msprime.sim_ancestry(
         simparams.N,
         population_size=simparams.N,
-        sequence_length=L,
-        recombination_rate=msprime.RateMap(
-            position=[0, L // 2, L], rate=[simparams.rho / 4 / simparams.N / L / 2, 0.0]
-        ),
+        sequence_length=SEQLEN,
+        recombination_rate=recombination_rate,
         random_seed=simparams.msprime_seed,
     )
 
@@ -141,19 +151,19 @@ def run_sim(simparams: SimParams):
     )
     ts = output.pop.dump_tables_to_tskit()
     rsamples = np.sort(np.random.choice([i for i in ts.samples()], 20, replace=False))
-    ts2 = ts.simplify(samples=rsamples).keep_intervals([[L // 2, L]])
+    ts2 = ts.simplify(samples=rsamples)  # .keep_intervals([[L // 2, L]])
     afs = (
         ts2.allele_frequency_spectrum(
             # sample_sets=[rsamples],
             mode="branch",
             span_normalise=True,
             polarised=True,
-            windows=[0, L // 2, L],
+            windows=WINDOWS,
         )
         # normalize afs back down to a theta of 1.0
         / 4.0
         / float(simparams.N)
-    )[1]
+    )
     return afs, simparams
 
 
@@ -163,25 +173,23 @@ def dispatch_work(args):
 
     params = []
 
-    for rho in RHOS:
-        for alpha in ALPHAS:
-            for i in range(args.nreps):
+    for alpha in ALPHAS:
+        for i in range(args.nreps):
+            msp_seed = np.random.randint(0, np.iinfo(np.uint32).max)
+            while msp_seed in used_msprime_seeds:
                 msp_seed = np.random.randint(0, np.iinfo(np.uint32).max)
-                while msp_seed in used_msprime_seeds:
-                    msp_seed = np.random.randint(0, np.iinfo(np.uint32).max)
-                used_msprime_seeds[msp_seed] = 1
+            used_msprime_seeds[msp_seed] = 1
+            fp11_seed = np.random.randint(0, np.iinfo(np.uint32).max)
+            while fp11_seed in used_fp11_seeds:
                 fp11_seed = np.random.randint(0, np.iinfo(np.uint32).max)
-                while fp11_seed in used_fp11_seeds:
-                    fp11_seed = np.random.randint(0, np.iinfo(np.uint32).max)
-                params.append(
-                    SimParams(
-                        N=args.popsize,
-                        rho=rho,
-                        alpha=alpha,
-                        msprime_seed=msp_seed,
-                        fwdpy11_seed=fp11_seed,
-                    )
+            params.append(
+                SimParams(
+                    N=args.popsize,
+                    alpha=alpha,
+                    msprime_seed=msp_seed,
+                    fwdpy11_seed=fp11_seed,
                 )
+            )
 
     if os.path.exists(DBNAME):
         os.remove(DBNAME)
@@ -192,7 +200,13 @@ def dispatch_work(args):
         futures = {executor.submit(run_sim, i) for i in params}
         for future in concurrent.futures.as_completed(futures):
             afs, simparams = future.result()
-            arrays.extend(afs, simparams)
+            i = 0
+            cumrho = 0
+            for rho, fs in zip(RHOS, afs):
+                if rho == 0.0:
+                    cumrho += RHOS[i - 1]
+                    arrays.extend(fs, cumrho, simparams)
+                i += 1
 
             if arrays.len() > int(50e6):
                 arrays.dump(DBNAME)
