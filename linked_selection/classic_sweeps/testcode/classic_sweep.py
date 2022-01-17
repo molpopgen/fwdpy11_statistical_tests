@@ -190,7 +190,7 @@ def dispatch_work(args):
     params = []
 
     for alpha in ALPHAS:
-        for i in range(args.nreps):
+        for _ in range(args.nreps):
             msp_seed = np.random.randint(0, np.iinfo(np.uint32).max)
             while msp_seed in used_msprime_seeds:
                 msp_seed = np.random.randint(0, np.iinfo(np.uint32).max)
