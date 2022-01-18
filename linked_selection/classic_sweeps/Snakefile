@@ -4,6 +4,8 @@ rule all:
     input:
         "output/data.sqlite3",
         "output/sfs.png",
+        "python_fixation_times.log",
 
 include: "rules/run_fwdpy11.smk"
+include: "rules/python_fixation_times.smk"
 include: "rules/sfs_plot.smk"
