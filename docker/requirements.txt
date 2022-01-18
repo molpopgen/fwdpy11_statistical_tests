@@ -1,4 +1,5 @@
 dataframe_image
+lxml
 tskit>=0.3.5
 msprime~=1.0
 snakemake
