@@ -27,32 +27,47 @@ DBNAME = "output/data.sqlite3"
 
 
 @dataclass
+class FixationTime:
+    alpha: float
+    fixation_time: int
+
+
+@dataclass
 class ForwardSimDataArrays:
     # Arrays to store data
     eta: List[int] = field(default_factory=list)
     count: List[float] = field(default_factory=list)
     alpha: List[float] = field(default_factory=list)
     rho: List[float] = field(default_factory=list)
+    fixation_times: List[FixationTime] = field(default_factory=list)
 
     def len(self):
         return len(self.eta)
 
     def to_df(self):
         df = pd.DataFrame(
-            {"eta": self.eta, "count": self.count, "2Ns": self.alpha, "4Nr": self.rho}
+            {
+                "eta": self.eta,
+                "count": self.count,
+                "2Ns": self.alpha,
+                "4Nr": self.rho,
+            }
         )
-        return df
+        fdf = pd.DataFrame(self.fixation_times)
+        return df, fdf
 
     def clear(self):
         self.eta.clear()
         self.count.clear()
         self.alpha.clear()
         self.rho.clear()
+        self.fixation_times.clear()
 
     def dump(self, dbname):
         conn = sqlite3.connect(dbname)
-        df = self.to_df()
+        df, fdf = self.to_df()
         df.to_sql("sfs", conn, index=False, if_exists="append")
+        fdf.to_sql("fwdpy11_fixation_times", conn, index=False, if_exists="append")
         self.clear()
 
     def extend(self, sfs, rho, simparams):
@@ -61,6 +76,10 @@ class ForwardSimDataArrays:
         self.alpha.extend([simparams.alpha] * n)
         self.rho.extend([rho] * n)
         self.count.extend(sfs[1:-1].tolist())
+
+    def append_fixation_time(self, pop, simparams):
+        assert len(pop.fixation_times) == 1
+        self.fixation_times.append(FixationTime(simparams.alpha, pop.fixation_times[0]))
 
 
 @dataclass
@@ -171,7 +190,9 @@ def run_sim(N: int, modelparams: List[SimParams], msprime_seed: int):
             if rho == 0.0:
                 cumrho += RHOS[i - 1]
                 arrays.extend(fs, cumrho, mparams)
+
             i += 1
+        arrays.append_fixation_time(output.pop, mparams)
     return arrays
 
 
