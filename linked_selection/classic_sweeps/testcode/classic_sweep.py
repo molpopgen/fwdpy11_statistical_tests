@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 
-ALPHAS = [100.0, 500.0, 1000.0, 2500.0]
+ALPHAS = [100.0, 1000.0, 10000.0]
 RHOS = [10.0, 0.0, 90.0, 0.0, 900.0, 0.0]
 LOCUS_LEN = 2000.0
 SEQLEN = len(RHOS) * LOCUS_LEN
