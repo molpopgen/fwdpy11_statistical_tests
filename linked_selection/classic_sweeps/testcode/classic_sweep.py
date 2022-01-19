@@ -23,6 +23,9 @@ LEFTS = np.arange(0, SEQLEN, LOCUS_LEN)
 RIGHTS = LEFTS + LOCUS_LEN
 WINDOWS = [i for i in LEFTS] + [SEQLEN]
 
+SCALING = 1.0
+DOMINANCE = 0.5
+
 DBNAME = "output/data.sqlite3"
 
 
@@ -127,7 +130,7 @@ def run_sim(N: int, modelparams: List[SimParams], msprime_seed: int):
         "recregions": recregions,
         "nregions": [],
         "sregions": [],
-        "gvalue": fwdpy11.Multiplicative(2.0),  # NOTE: scaling may be wrong
+        "gvalue": fwdpy11.Multiplicative(SCALING),
         "simlen": 100 * N,
         "rates": (0, 0, None),
     }
@@ -151,7 +154,8 @@ def run_sim(N: int, modelparams: List[SimParams], msprime_seed: int):
         mutation_data = fwdpy11.conditional_models.NewMutationParameters(
             frequency=fwdpy11.conditional_models.AlleleCount(1),
             data=fwdpy11.NewMutationData(
-                effect_size=mparams.alpha / 2 / pop.N, dominance=1
+                effect_size=mparams.alpha / 2 / pop.N,
+                dominance=DOMINANCE,
             ),
             position=fwdpy11.conditional_models.PositionRange(
                 left=0.0, right=np.finfo(float).eps
@@ -184,14 +188,10 @@ def run_sim(N: int, modelparams: List[SimParams], msprime_seed: int):
             / 4.0
             / float(N)
         )
-        i = 0
         cumrho = 0
-        for rho, fs in zip(RHOS, afs):
-            if rho == 0.0:
-                cumrho += RHOS[i - 1]
-                arrays.extend(fs, cumrho, mparams)
-
-            i += 1
+        for rho, fs in zip(RHOS[0::2], afs[1::2]):
+            cumrho += rho
+            arrays.extend(fs, cumrho, mparams)
         arrays.append_fixation_time(output.pop, mparams)
     return arrays
 
