@@ -26,8 +26,13 @@ def Pnk(n, k, theta, r, s, epsilon, delta):
     p = delta
     rv = 0.0
     C = math.comb(n, k)
+    ldelta = math.log(delta)
     while p < 1:
-        rv += p ** k * (1.0 - p) ** (n - k) * phi1p(theta, p, r, s, epsilon) * delta
+        #rv += p ** k * (1.0 - p) ** (n - k) * phi1p(theta, p, r, s, epsilon) * delta
+        phi = phi1p(theta,p,r,s,epsilon)
+        if phi > 0.0:
+            temp = k*math.log(p) + (n-k)*math.log(1.-p) + math.log(phi) + ldelta
+            rv += math.exp(temp)
         p += delta
 
     return C * rv
@@ -43,4 +48,4 @@ rho = 100
 r = rho / 4 / N
 s = alpha / 2 / N
 
-print(polarised_sfs(20, 1.0, r, s, 1.0 / alpha, 1e-5))
+print(polarised_sfs(20, 1.0, r, s, 1.0 / alpha, 1e-6))
