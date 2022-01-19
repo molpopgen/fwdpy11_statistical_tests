@@ -20,7 +20,7 @@ def phi1p(theta, p, r, s, epsilon):
     return 0
 
 
-def Pnk(n, k, theta, r, s, epsilon, delta=1e-7):
+def Pnk(n, k, theta, r, s, epsilon, delta):
     assert k > 0
     assert k < n
     p = delta
@@ -33,7 +33,7 @@ def Pnk(n, k, theta, r, s, epsilon, delta=1e-7):
     return C * rv
 
 
-def polarised_sfs(n, theta, r, s, epsilon, delta=1e-7):
+def polarised_sfs(n, theta, r, s, epsilon, delta=1e-5):
     return [Pnk(n, i, theta, r, s, epsilon, delta) for i in range(1, n)]
 
 
@@ -43,4 +43,4 @@ rho = 100
 r = rho / 4 / N
 s = alpha / 2 / N
 
-print(polarised_sfs(20, 1.0, r, s, 1.0 / alpha, 1e-7))
+print(polarised_sfs(20, 1.0, r, s, 1.0 / alpha, 1e-5))
