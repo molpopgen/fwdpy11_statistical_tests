@@ -2,7 +2,7 @@ import sqlite3
 import dataframe_image
 import pandas as pd
 
-from testcode import DBNAME
+from testutils import DBNAME
 
 with sqlite3.connect(DBNAME) as conn:
     fp11 = pd.read_sql("select * from fwdpy11_fixation_times", conn)

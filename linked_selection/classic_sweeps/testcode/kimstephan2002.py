@@ -5,14 +5,23 @@ Equation 5 from Kim, Yuseob, and Wolfgang Stephan. 2002. “Detecting a Local Si
 import argparse
 import concurrent.futures
 import math
+from dataclasses import dataclass
 import sqlite3
 import sys
 
 import numpy as np
 import pandas as pd
 
-ALPHAS = [100.0, 1000.0, 10000.0]
-CUM_RHOS = [10.0, 100.0, 1000.0]
+from testutils import ALPHAS, CUM_RHOS, DBNAME
+
+
+@dataclass
+class Record:
+    alpha: float
+    rho: float
+    eta: float
+    count: float
+
 
 def phi1p(theta, p, r, s, epsilon):
     assert p > 0.0
@@ -46,8 +55,12 @@ def Pnk(n, k, theta, r, s, epsilon, delta):
     return C * rv
 
 
-def polarised_sfs(n, theta, r, s, epsilon, delta=1e-5):
-    return [Pnk(n, i, theta, r, s, epsilon, delta) for i in range(1, n)]
+def polarised_sfs(N, rho, alpha, n, theta, delta=1e-5):
+    r = rho / 4 / N
+    s = alpha / 2 / N
+    epsilon = 1.0 / alpha
+
+    return alpha, rho, [Pnk(n, i, theta, r, s, epsilon, delta) for i in range(1, n)]
 
 
 def make_parser():
@@ -60,13 +73,39 @@ def make_parser():
         "--popsize", "-N", type=int, default=None, help="Diploid population size"
     )
 
+    parser.add_argument(
+        "--cores", "-c", type=int, default=1, help="Number of cores to use"
+    )
+
     return parser
 
 
-N = 5000
-alpha = 1000
-rho = 100
-r = rho / 4 / N
-s = alpha / 2 / N
+parser = make_parser()
+args = parser.parse_args(sys.argv[1:])
 
-print(polarised_sfs(20, 1.0, r, s, 1.0 / alpha, 1e-6))
+N = args.popsize
+
+params = []
+
+for rho in CUM_RHOS:
+    for alpha in ALPHAS:
+        params.append((rho, alpha))
+
+
+data = []
+with concurrent.futures.ProcessPoolExecutor(max_workers=args.cores) as executor:
+    futures = {
+        executor.submit(polarised_sfs, N, rho, alpha, 20, 1.0, 1e-5)
+        for rho, alpha in params
+    }
+    for future in concurrent.futures.as_completed(futures):
+        alpha, rho, sfs = future.result()
+        for i, c in enumerate(sfs):
+            data.append(Record(alpha, rho, i + 1, c))
+
+df = pd.DataFrame(data)
+
+df = df.rename(columns={"rho": "4Nr", "alpha": "2Ns"})
+
+with sqlite3.connect(DBNAME) as conn:
+    df.to_sql("kimstephan", conn, index=False)
