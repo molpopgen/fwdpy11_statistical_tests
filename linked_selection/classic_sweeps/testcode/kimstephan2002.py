@@ -3,9 +3,13 @@ Equation 5 from Kim, Yuseob, and Wolfgang Stephan. 2002. “Detecting a Local Si
 """
 
 import argparse
+import concurrent.futures
 import math
+import sqlite3
+import sys
 
 import numpy as np
+import pandas as pd
 
 
 def phi1p(theta, p, r, s, epsilon):
@@ -28,10 +32,12 @@ def Pnk(n, k, theta, r, s, epsilon, delta):
     C = math.comb(n, k)
     ldelta = math.log(delta)
     while p < 1:
-        #rv += p ** k * (1.0 - p) ** (n - k) * phi1p(theta, p, r, s, epsilon) * delta
-        phi = phi1p(theta,p,r,s,epsilon)
+        # rv += p ** k * (1.0 - p) ** (n - k) * phi1p(theta, p, r, s, epsilon) * delta
+        phi = phi1p(theta, p, r, s, epsilon)
         if phi > 0.0:
-            temp = k*math.log(p) + (n-k)*math.log(1.-p) + math.log(phi) + ldelta
+            temp = (
+                k * math.log(p) + (n - k) * math.log(1.0 - p) + math.log(phi) + ldelta
+            )
             rv += math.exp(temp)
         p += delta
 
@@ -40,6 +46,19 @@ def Pnk(n, k, theta, r, s, epsilon, delta):
 
 def polarised_sfs(n, theta, r, s, epsilon, delta=1e-5):
     return [Pnk(n, i, theta, r, s, epsilon, delta) for i in range(1, n)]
+
+
+def make_parser():
+    parser = argparse.ArgumentParser(
+        description="Calculate the expected polarised SFS using approximations based on deterministic theory.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    parser.add_argument(
+        "--popsize", "-N", type=int, default=None, help="Diploid population size"
+    )
+
+    return parser
 
 
 N = 5000
