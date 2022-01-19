@@ -2,7 +2,7 @@ import sqlite3
 import dataframe_image
 import pandas as pd
 
-DBNAME = "output/data.sqlite3"
+from testcode import DBNAME
 
 with sqlite3.connect(DBNAME) as conn:
     fp11 = pd.read_sql("select * from fwdpy11_fixation_times", conn)
@@ -13,7 +13,7 @@ with sqlite3.connect(DBNAME) as conn:
 
     df = pd.concat([fp11, py])
 
-    df = df.groupby(["simulator", "alpha"]).describe() #.reset_index()
+    df = df.groupby(["simulator", "alpha"]).describe()
 
     dataframe_image.export(
         df, "output/fixation_times.png", table_conversion="matplotlib"

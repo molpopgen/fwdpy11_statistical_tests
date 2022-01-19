@@ -13,8 +13,9 @@ import msprime
 import numpy as np
 import pandas as pd
 
+from testutils import ALPHAS, DOMINANCE, SCALING, DBNAME
 
-ALPHAS = [100.0, 1000.0, 10000.0]
+
 RHOS = [10.0, 0.0, 90.0, 0.0, 900.0, 0.0]
 LOCUS_LEN = 2000.0
 SEQLEN = len(RHOS) * LOCUS_LEN
@@ -22,11 +23,6 @@ SEQLEN = len(RHOS) * LOCUS_LEN
 LEFTS = np.arange(0, SEQLEN, LOCUS_LEN)
 RIGHTS = LEFTS + LOCUS_LEN
 WINDOWS = [i for i in LEFTS] + [SEQLEN]
-
-SCALING = 1.0
-DOMINANCE = 0.5
-
-DBNAME = "output/data.sqlite3"
 
 
 @dataclass

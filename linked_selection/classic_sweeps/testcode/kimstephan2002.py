@@ -11,6 +11,8 @@ import sys
 import numpy as np
 import pandas as pd
 
+ALPHAS = [100.0, 1000.0, 10000.0]
+CUM_RHOS = [10.0, 100.0, 1000.0]
 
 def phi1p(theta, p, r, s, epsilon):
     assert p > 0.0

@@ -1,0 +1,6 @@
+ALPHAS = [100.0, 1000.0, 10000.0]
+CUM_RHOS = [10.0, 100.0, 1000.0]
+DBNAME = "output/data.sqlite3"
+
+SCALING = 1.0
+DOMINANCE = 0.5

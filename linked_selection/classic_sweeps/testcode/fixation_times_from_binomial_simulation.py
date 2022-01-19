@@ -6,8 +6,8 @@ import pandas as pd
 import sys
 
 import numpy as np
+from testutils import ALPHAS, DOMINANCE, SCALING
 
-ALPHAS = [100.0, 1000.0, 10000.0]
 DBNAME = "output/data.sqlite3"
 
 
@@ -46,8 +46,8 @@ def simulate(N, alpha, generator):
 
     # NOTE: will have to confirm these fitnesses
     wAA = 1
-    wAa = 1 + s
-    waa = 1 + 2.0 * s
+    wAa = 1 + DOMINANCE * s
+    waa = 1 + SCALING * s
 
     done = False
 
