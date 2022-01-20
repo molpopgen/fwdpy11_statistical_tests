@@ -70,4 +70,32 @@ def main_sfs_figure_model(N) -> SimulationSetup:
         "recombination_rate": recombination_rate,
     }
 
-    return SimulationSetup(N, DOMINANCE, SCALING, SEQLEN, RHOS, ALPHAS, WINDOWS, pdict, sim_ancestry_kwargs)
+    return SimulationSetup(
+        N, SEQLEN, DOMINANCE, SCALING, RHOS, ALPHAS, WINDOWS, pdict, sim_ancestry_kwargs
+    )
+
+
+def windowed_variation_model(N, rho, num_windows) -> SimulationSetup:
+    L = 1e6
+
+    recregions = [fwdpy11.PoissonInterval(0, int(L), rho / 4 / N, discrete=True)]
+    pdict = {
+        "recregions": recregions,
+        "nregions": [],
+        "sregions": [],
+        "gvalue": fwdpy11.Multiplicative(SCALING),
+        "simlen": 100 * N,
+        "rates": (0, 0, None),
+    }
+    recombination_rate = msprime.RateMap(position=[0.0, L], rate=[rho / 4 / N / L])
+    sim_ancestry_kwargs = {
+        "samples": N,
+        "population_size": N,
+        "sequence_length": L,
+        "recombination_rate": recombination_rate,
+    }
+
+    windows = np.arange(0, L, num_windows).tolist() + [L]
+    return SimulationSetup(
+        N, L, DOMINANCE, SCALING, [rho], ALPHAS, windows, pdict, sim_ancestry_kwargs
+    )

@@ -1,2 +1,3 @@
 nreps: 128
 popsize: 1000
+numwins: 100

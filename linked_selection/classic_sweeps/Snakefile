@@ -3,11 +3,15 @@ configfile: "config.yaml"
 rule all:
     input:
         "output/data.sqlite3",
+        "output/windowed_variation.sqlite3",
         "output/sfs.png",
         "output/fixation_times.png",
+        "output/windowed_variation.png",
         "output/python_fixation_times.log",
 
 include: "rules/run_fwdpy11.smk"
+include: "rules/windowed_variation_sims.smk"
+include: "rules/windowed_variation_plot.smk"
 include: "rules/python_fixation_times.smk"
 include: "rules/sfs_plot.smk"
 include: "rules/summarise_fixation_times.smk"
