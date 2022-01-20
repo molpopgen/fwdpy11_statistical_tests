@@ -13,13 +13,11 @@ import msprime
 import numpy as np
 import pandas as pd
 
-from testutils import ALPHAS, DOMINANCE, SCALING, DBNAME
+from testutils import ALPHAS, DOMINANCE, SCALING, DBNAME, RHOS
 
 
-RHOS = [10.0, 0.0, 90.0, 0.0, 900.0, 0.0]
-LOCUS_LEN = 2000.0
+LOCUS_LEN = 1e6
 SEQLEN = len(RHOS) * LOCUS_LEN
-# L = 2000  # NOTE: may need/want a much larger value
 LEFTS = np.arange(0, SEQLEN, LOCUS_LEN)
 RIGHTS = LEFTS + LOCUS_LEN
 WINDOWS = [i for i in LEFTS] + [SEQLEN]

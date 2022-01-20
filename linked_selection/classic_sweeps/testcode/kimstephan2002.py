@@ -95,7 +95,7 @@ for rho in CUM_RHOS:
 data = []
 with concurrent.futures.ProcessPoolExecutor(max_workers=args.cores) as executor:
     futures = {
-        executor.submit(polarised_sfs, N, rho, alpha, 20, 1.0, 1e-5)
+        executor.submit(polarised_sfs, N, rho, alpha, 20, 1.0, 1.0 / 50.0 / N)
         for rho, alpha in params
     }
     for future in concurrent.futures.as_completed(futures):
