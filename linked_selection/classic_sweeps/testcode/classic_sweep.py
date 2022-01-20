@@ -197,14 +197,15 @@ def dispatch_work(args):
     params = []
     msprime_seeds = []
 
-    for alpha in ALPHAS:
-        for _ in range(args.ncores):
+    for _ in range(args.ncores):
+        for alpha in ALPHAS:
             msp_seed = np.random.randint(0, np.iinfo(np.uint32).max)
             while msp_seed in used_msprime_seeds:
                 msp_seed = np.random.randint(0, np.iinfo(np.uint32).max)
             used_msprime_seeds[msp_seed] = 1
             msprime_seeds.append(msp_seed)
-        for _ in range(args.nreps):
+    for _ in range(args.nreps):
+        for alpha in ALPHAS:
             fp11_seed = np.random.randint(0, np.iinfo(np.uint32).max)
             while fp11_seed in used_fp11_seeds:
                 fp11_seed = np.random.randint(0, np.iinfo(np.uint32).max)
@@ -214,14 +215,6 @@ def dispatch_work(args):
                     fwdpy11_seed=fp11_seed,
                 )
             )
-
-    # on average, balance the work load over processes
-    random.shuffle(params)
-
-    starts = np.arange(0, len(params), args.ncores)
-
-    stops = starts + args.ncores
-    stops[-1] = len(params)
 
     if os.path.exists(DBNAME):
         os.remove(DBNAME)
