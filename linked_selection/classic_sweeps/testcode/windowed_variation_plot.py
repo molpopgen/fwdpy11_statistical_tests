@@ -8,12 +8,14 @@ import sys
 conn = sqlite3.connect(sys.argv[1])
 output = sys.argv[2]
 
-df = pd.read_sql("select * from windowed_variation", conn)
+# This script will take up
+# too much RAM if we load then aggregate.
+df = pd.read_sql(
+    'select "2Ns","4Nr",window,avg(diversity) as diversity from windowed_variation group by "2Ns", "4Nr", window',
+    conn,
+)
 
-df = df.groupby(["window", "2Ns", "4Nr"]).mean().reset_index()
-
-print(df.head())
-print(df.tail())
+# df = df.groupby(["window", "2Ns", "4Nr"]).mean().reset_index()
 
 g = sns.FacetGrid(df, row="2Ns", col="4Nr", margin_titles=True)
 g.map(sns.scatterplot, "window", "diversity")
