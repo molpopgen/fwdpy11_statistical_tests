@@ -19,7 +19,6 @@ def make_parser():
 parser = make_parser()
 args = parser.parse_args(sys.argv[1:])
 
-print(args.dbname)
 
 with sqlite3.connect(args.dbname) as conn:
     fp11 = pd.read_sql("select * from fwdpy11_fixation_times", conn)
