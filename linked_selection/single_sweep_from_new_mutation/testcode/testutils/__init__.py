@@ -41,6 +41,54 @@ class SimulationSetup:
     sim_ancestry_kwargs: Dict
 
 
+def neutral_beads_on_string(N, cumrhos, alphas):
+    assert all(i > 0 for i in cumrhos), "All 4Nr values must be > 0"
+    assert all(i > 0 for i in alphas), "All 2Ns values must be > 0"
+
+    cumrhos = sorted(cumrhos)
+
+    rhos = []
+    last_rho = 0.0
+    for r in cumrhos:
+        rhos.append(r - last_rho)
+        last_rho += rhos[-1]
+        rhos.append(0.0)
+
+    seqlen = len(rhos) * LOCUS_LEN
+    lefts = np.arange(0, seqlen, LOCUS_LEN)
+    rights = lefts + LOCUS_LEN
+    windows = [i for i in lefts] + [SEQLEN]
+    recregions = []
+    position = []
+    rate = []
+    for left, right, rho in zip(lefts, rights, rhos):
+        recregions.append(
+            fwdpy11.PoissonInterval(int(left), int(right), rho / 4 / N, discrete=True)
+        )
+        position.append(left)
+        rate.append(rho / 4 / N / (right - left))
+    position.append(SEQLEN)
+    pdict = {
+        "recregions": recregions,
+        "nregions": [],
+        "sregions": [],
+        "gvalue": fwdpy11.Multiplicative(SCALING),
+        "simlen": 100 * N,
+        "rates": (0, 0, None),
+    }
+    recombination_rate = msprime.RateMap(position=position, rate=rate)
+    sim_ancestry_kwargs = {
+        "samples": N,
+        "population_size": N,
+        "sequence_length": SEQLEN,
+        "recombination_rate": recombination_rate,
+    }
+
+    return SimulationSetup(
+        N, seqlen, DOMINANCE, SCALING, rhos, alphas, windows, pdict, sim_ancestry_kwargs
+    )
+
+
 def main_sfs_figure_model(N) -> SimulationSetup:
     recregions = []
     position = []

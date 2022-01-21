@@ -14,7 +14,7 @@ import pandas as pd
 
 from testutils import (
     SimulationSetup,
-    main_sfs_figure_model,
+    neutral_beads_on_string,
 )
 
 
@@ -102,6 +102,22 @@ def make_parser():
         "--ncores", type=int, default=-1, help="Number of cores/processes to use"
     )
 
+    parser.add_argument(
+        "--rhos",
+        nargs="+",
+        type=float,
+        default=[],
+        help="Scaled recombination rates (4Nr) from the selected mutation.  These will be sorted an treated as cumulative recombination distances.",
+    )
+
+    parser.add_argument(
+        "--alphas",
+        nargs="+",
+        type=float,
+        default=[],
+        help="Scaled selection coefficients (2Ns) from the selected mutation",
+    )
+
     parser.add_argument("--dbname", type=str, help="Name of sqlite3 database")
 
     return parser
@@ -172,7 +188,7 @@ def dispatch_work(args):
     params = []
     msprime_seeds = []
 
-    setup = main_sfs_figure_model(args.popsize)
+    setup = neutral_beads_on_string(args.popsize, args.rhos, args.alphas)
 
     for _ in range(args.ncores):
         for alpha in setup.alphas:
