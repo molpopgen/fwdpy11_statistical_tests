@@ -115,7 +115,7 @@ def make_parser():
         nargs="+",
         type=float,
         default=[],
-        help="Scaled selection coefficients (2Ns) from the selected mutation",
+        help="Scaled selection coefficients (2Ns).",
     )
 
     parser.add_argument("--dbname", type=str, help="Name of sqlite3 database")

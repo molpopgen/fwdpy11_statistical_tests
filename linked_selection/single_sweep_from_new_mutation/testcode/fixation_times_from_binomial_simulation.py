@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 
 import numpy as np
-from testutils import ALPHAS, DOMINANCE, SCALING
+from testutils import DOMINANCE, SCALING
 
 
 @dataclass
@@ -37,6 +37,15 @@ def make_parser():
     )
 
     parser.add_argument("--dbname", type=str, help="Name of sqlite3 database")
+
+    parser.add_argument(
+        "--alphas",
+        nargs="+",
+        type=float,
+        default=[],
+        help="Scaled selection coefficients (2Ns).",
+    )
+
 
     return parser
 
@@ -84,7 +93,7 @@ def run_sim(N, alpha, seed):
 def dispatch_work(args):
     params = []
     used_seeds = {}
-    for a in ALPHAS:
+    for a in args.alphas:
         for _ in range(args.nreps):
             seed = np.random.randint(0, np.iinfo(np.uint32).max)
             while seed in used_seeds:

@@ -90,7 +90,7 @@ def make_parser():
         nargs="+",
         type=float,
         default=[],
-        help="Scaled selection coefficients (2Ns) from the selected mutation",
+        help="Scaled selection coefficients (2Ns).",
     )
 
     return parser
