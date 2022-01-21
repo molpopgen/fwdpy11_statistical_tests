@@ -18,7 +18,7 @@ SEQLEN = len(RHOS) * LOCUS_LEN
 LEFTS = np.arange(0, SEQLEN, LOCUS_LEN)
 RIGHTS = LEFTS + LOCUS_LEN
 WINDOWS = [i for i in LEFTS] + [SEQLEN]
-DBNAME = "output/data.sqlite3"
+DBNAME = "output/sfs_data.sqlite3"
 
 SCALING = 2.0
 DOMINANCE = 1.0

@@ -8,7 +8,7 @@ import sys
 import numpy as np
 from testutils import ALPHAS, DOMINANCE, SCALING
 
-DBNAME = "output/data.sqlite3"
+DBNAME = "output/sfs_data.sqlite3"
 
 
 @dataclass
