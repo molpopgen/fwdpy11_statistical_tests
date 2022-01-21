@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 
 from testutils import (
-    DBNAME,
     SimulationSetup,
     main_sfs_figure_model,
 )
@@ -102,6 +101,8 @@ def make_parser():
     parser.add_argument(
         "--ncores", type=int, default=-1, help="Number of cores/processes to use"
     )
+
+    parser.add_argument("--dbname", type=str, help="Name of sqlite3 database")
 
     return parser
 
@@ -192,8 +193,8 @@ def dispatch_work(args):
                 )
             )
 
-    if os.path.exists(DBNAME):
-        os.remove(DBNAME)
+    if os.path.exists(args.dbname):
+        os.remove(args.dbname)
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=args.ncores) as executor:
         futures = {
@@ -205,7 +206,7 @@ def dispatch_work(args):
         }
         for future in concurrent.futures.as_completed(futures):
             arrays = future.result()
-            arrays.dump(DBNAME)
+            arrays.dump(args.dbname)
 
 
 if __name__ == "__main__":

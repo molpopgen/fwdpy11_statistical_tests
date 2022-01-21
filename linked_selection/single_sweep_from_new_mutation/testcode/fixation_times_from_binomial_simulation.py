@@ -8,8 +8,6 @@ import sys
 import numpy as np
 from testutils import ALPHAS, DOMINANCE, SCALING
 
-DBNAME = "output/sfs_data.sqlite3"
-
 
 @dataclass
 class Result:
@@ -37,6 +35,8 @@ def make_parser():
     parser.add_argument(
         "--ncores", type=int, default=-1, help="Number of cores/processes to use"
     )
+
+    parser.add_argument("--dbname", type=str, help="Name of sqlite3 database")
 
     return parser
 
@@ -105,7 +105,7 @@ def dispatch_work(args):
 
     df = pd.DataFrame(results)
 
-    with sqlite3.connect(DBNAME) as conn:
+    with sqlite3.connect(args.dbname) as conn:
         df.to_sql("python_fixation_times", conn, index=False, if_exists="fail")
 
 

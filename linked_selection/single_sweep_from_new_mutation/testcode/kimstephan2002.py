@@ -12,7 +12,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-from testutils import ALPHAS, CUM_RHOS, DBNAME
+from testutils import ALPHAS, CUM_RHOS
 
 
 @dataclass
@@ -77,6 +77,8 @@ def make_parser():
         "--cores", "-c", type=int, default=1, help="Number of cores to use"
     )
 
+    parser.add_argument("--dbname", type=str, help="Name of sqlite3 database")
+
     return parser
 
 
@@ -107,5 +109,5 @@ df = pd.DataFrame(data)
 
 df = df.rename(columns={"rho": "4Nr", "alpha": "2Ns"})
 
-with sqlite3.connect(DBNAME) as conn:
+with sqlite3.connect(args.dbname) as conn:
     df.to_sql("kimstephan", conn, index=False)
