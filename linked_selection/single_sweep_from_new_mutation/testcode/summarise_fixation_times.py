@@ -12,6 +12,11 @@ def make_parser():
     )
 
     parser.add_argument("--dbname", type=str, help="Name of sqlite3 database")
+    parser.add_argument(
+        "--pydbname",
+        type=str,
+        help="Name of sqlite3 database with Python fixation times",
+    )
 
     return parser
 
@@ -22,15 +27,17 @@ args = parser.parse_args(sys.argv[1:])
 
 with sqlite3.connect(args.dbname) as conn:
     fp11 = pd.read_sql("select * from fwdpy11_fixation_times", conn)
+
+with sqlite3.connect(args.pydbname) as conn:
+    print(conn)
+    print(args.pydbname)
     py = pd.read_sql("select * from python_fixation_times", conn)
 
-    fp11["simulator"] = ["fwdpy11"] * len(fp11.index)
-    py["simulator"] = ["python"] * len(py.index)
+fp11["simulator"] = ["fwdpy11"] * len(fp11.index)
+py["simulator"] = ["python"] * len(py.index)
 
-    df = pd.concat([fp11, py])
+df = pd.concat([fp11, py])
 
-    df = df.groupby(["simulator", "alpha"]).describe()
+df = df.groupby(["simulator", "alpha"]).describe()
 
-    dataframe_image.export(
-        df, "output/fixation_times.png", table_conversion="matplotlib"
-    )
+dataframe_image.export(df, "output/fixation_times.png", table_conversion="matplotlib")
