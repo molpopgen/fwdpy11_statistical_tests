@@ -12,8 +12,6 @@ import sys
 import numpy as np
 import pandas as pd
 
-from testutils import ALPHAS, CUM_RHOS
-
 
 @dataclass
 class Record:
@@ -79,6 +77,22 @@ def make_parser():
 
     parser.add_argument("--dbname", type=str, help="Name of sqlite3 database")
 
+    parser.add_argument(
+        "--rhos",
+        nargs="+",
+        type=float,
+        default=[],
+        help="Cumulative scaled recombination rates (4Nr) from the selected mutation.",
+    )
+
+    parser.add_argument(
+        "--alphas",
+        nargs="+",
+        type=float,
+        default=[],
+        help="Scaled selection coefficients (2Ns) from the selected mutation",
+    )
+
     return parser
 
 
@@ -89,8 +103,8 @@ N = args.popsize
 
 params = []
 
-for rho in CUM_RHOS:
-    for alpha in ALPHAS:
+for rho in sorted(args.rhos):
+    for alpha in args.alphas:
         params.append((rho, alpha))
 
 
