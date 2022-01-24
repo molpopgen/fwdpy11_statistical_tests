@@ -171,6 +171,70 @@ def run_windowed_variation(args):
     logging.info("Done!")
 
 
+def kim_stephan_fig4(args):
+    tag = set_tag(args)
+    setup_logging("kim_stephan_fig4.txt")
+    logging.info(f"Building temporary docker image kim_stephan_fig4:{tag}.")
+    output = subprocess.run(
+        [
+            "docker",
+            "build",
+            "--build-arg",
+            f"tag={tag}",
+            ".",
+            "-t",
+            f"kim_stephan_fig4:{tag}",
+        ],
+        capture_output=True,
+    )
+    handle_return_value(output)
+
+    logging.info("Running Snakefile.")
+
+    local_folder = os.getcwd() + ":/mnt"
+
+    snakemake_cmd = " ".join(
+        [
+            '"snakemake',
+            "--snakefile",
+            "Snakefile.kim_stephan_fig4",
+            "-j",
+            str(args.cores),
+            "--config",
+            f"nreps={args.nreps}",
+            # f"popsize={args.popsize}",
+            "&&",
+            "snakemake",
+            "--snakefile",
+            "Snakefile.kim_stephan_fig4",
+            "--report",
+            '/mnt/sfs_report.html"',
+        ]
+    )
+
+    output = subprocess.run(
+        [
+            "docker",
+            "run",
+            "-v",
+            f"{local_folder}",
+            f"kim_stephan_fig4:{tag}",
+            "/bin/bash",
+            "-c",
+            f'"{snakemake_cmd}"',
+        ],
+        capture_output=True,
+    )
+    handle_return_value(output, log=True)
+
+    logging.info(f"Removing temporary docker image kim_stephan_fig4:{tag}.")
+    output = subprocess.run(
+        ["docker", "image", "rm", "-f", f"kim_stephan_fig4:{tag}"], capture_output=True
+    )
+    handle_return_value(output)
+    logging.info("Done!")
+
+
 def make_parser():
     parser = argparse.ArgumentParser(
         description='Generate reports for classic ("hard"/complete) sweep models.',
@@ -207,6 +271,9 @@ def make_parser():
         i.add_argument(
             "--popsize", "-N", type=int, default=1000, help="Diploid population size"
         )
+
+    kim_stephan_fig4_parser = subparsers.add_parser("kimstephanfig4")
+    kim_stephan_fig4_parser.set_defaults(func=kim_stephan_fig4)
 
     return parser
 
