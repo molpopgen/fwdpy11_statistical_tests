@@ -43,7 +43,9 @@ if __name__ == "__main__":
     g = sns.FacetGrid(df, row="2Ns", col="4Nr", hue="source", margin_titles=True)
     g.map(sns.scatterplot, "eta", "count", alpha=0.75)
 
-    g.set(xticks=np.arange(1, 20, 2))
+    nsam = len(df.eta.unique()) + 1
+
+    g.set(xticks=np.arange(1, nsam, 2))
     g.set(xlabel=r"$\eta$")
     g.set(ylabel="E[# mutations]")
     g.add_legend()

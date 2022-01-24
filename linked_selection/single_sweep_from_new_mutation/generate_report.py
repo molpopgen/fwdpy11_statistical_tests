@@ -208,7 +208,7 @@ def kim_stephan_fig4(args):
             "--snakefile",
             "Snakefile.kim_stephan_fig4",
             "--report",
-            '/mnt/sfs_report.html"',
+            '/mnt/kim_stephan_fig4_report.html"',
         ]
     )
 

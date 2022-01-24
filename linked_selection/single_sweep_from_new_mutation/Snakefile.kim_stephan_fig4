@@ -2,7 +2,7 @@ configfile: "kim_stephan_fig4.yaml"
 
 rule all:
     input:
-        "output/sfs_data.sqlite3",
+        "output/sfs.png",
 
 rule make_database:
     input: "testcode/classic_sweep.py",
@@ -17,4 +17,29 @@ rule make_database:
     shell:
         """
         python3 testcode/classic_sweep.py --popsize {params.popsize} --nreps {params.nreps} --ncores {threads} --dbname output/sfs_data.sqlite3 --rhos {params.rhos} --alphas {params.alphas} --nsam {params.nsam}
+        """
+
+rule kimstephan:
+    input: "testcode/kimstephan2002.py",
+    log: "output/kimstephan.sqlite3",
+    threads: 8
+    params:
+        popsize=expand("{popsize}", popsize=config["popsize"]),
+        rhos=expand("{rhos}", rhos=config["rhos"]),
+        alphas=expand("{alphas}", alphas=config["alphas"]),
+        nsam=expand("{nsam}", nsam=config["nsam"]),
+    shell:
+        """
+        python3 testcode/kimstephan2002.py --popsize {params.popsize} --cores {threads} --dbname output/kimstephan.sqlite3 --rhos {params.rhos} --alphas {params.alphas} --nsam {params.nsam}
+        """
+
+rule make_sfs_plot:
+    input: "output/sfs_data.sqlite3",
+           "output/kimstephan.sqlite3",
+           "testcode/sfs_plot.py",
+    output: report("output/sfs.png", category="Allele frequency spectrum")
+    threads: 1
+    shell:
+        """
+        python3 testcode/sfs_plot.py --dbname output/sfs_data.sqlite3  --ksdbname output/kimstephan.sqlite3 --outfile output/sfs.png
         """
