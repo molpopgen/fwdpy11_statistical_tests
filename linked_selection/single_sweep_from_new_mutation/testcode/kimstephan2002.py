@@ -93,11 +93,15 @@ def make_parser():
         help="Scaled selection coefficients (2Ns).",
     )
 
+    parser.add_argument("--nsam", "-n", type=int, default=-1, help="Sample size.")
+
     return parser
 
 
 parser = make_parser()
 args = parser.parse_args(sys.argv[1:])
+
+assert args.nsam >= 2
 
 N = args.popsize
 
@@ -111,7 +115,7 @@ for rho in sorted(args.rhos):
 data = []
 with concurrent.futures.ProcessPoolExecutor(max_workers=args.cores) as executor:
     futures = {
-        executor.submit(polarised_sfs, N, rho, alpha, 20, 1.0, 1.0 / 50.0 / N)
+        executor.submit(polarised_sfs, N, rho, alpha, args.nsam, 1.0, 1.0 / 50.0 / N)
         for rho, alpha in params
     }
     for future in concurrent.futures.as_completed(futures):

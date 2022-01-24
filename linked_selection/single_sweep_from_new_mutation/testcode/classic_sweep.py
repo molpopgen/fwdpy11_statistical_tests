@@ -118,12 +118,17 @@ def make_parser():
         help="Scaled selection coefficients (2Ns).",
     )
 
+    parser.add_argument(
+        "--nsam", "-n", type=int, default=-1, help="Sample size (haploid nodes)"
+    )
+
     parser.add_argument("--dbname", type=str, help="Name of sqlite3 database")
 
     return parser
 
 
-def run_sim(setup: SimulationSetup, modelparams: List[SimParams], msprime_seed):
+def run_sim(setup: SimulationSetup, modelparams: List[SimParams], msprime_seed, nsam):
+    assert nsam >= 2
     arrays = ForwardSimDataArrays()
 
     for ts, mparams in zip(
@@ -159,7 +164,7 @@ def run_sim(setup: SimulationSetup, modelparams: List[SimParams], msprime_seed):
         )
         ts = output.pop.dump_tables_to_tskit()
         rsamples = np.sort(
-            np.random.choice([i for i in ts.samples()], 20, replace=False)
+            np.random.choice([i for i in ts.samples()], nsam, replace=False)
         )
         ts2 = ts.simplify(samples=rsamples)  # .keep_intervals([[L // 2, L]])
         afs = (
@@ -214,7 +219,7 @@ def dispatch_work(args):
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=args.ncores) as executor:
         futures = {
-            executor.submit(run_sim, setup, i, j)
+            executor.submit(run_sim, setup, i, j, args.nsam)
             for i, j in zip(
                 np.array_split(params, args.ncores),
                 msprime_seeds,
@@ -228,5 +233,7 @@ def dispatch_work(args):
 if __name__ == "__main__":
     parser = make_parser()
     args = parser.parse_args(sys.argv[1:])
+
+    print(args)
 
     dispatch_work(args)
