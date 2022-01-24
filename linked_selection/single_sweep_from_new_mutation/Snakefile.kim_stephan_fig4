@@ -1,0 +1,20 @@
+configfile: "kim_stephan_fig4.yaml"
+
+rule all:
+    input:
+        "output/sfs_data.sqlite3",
+
+rule make_database:
+    input: "testcode/classic_sweep.py",
+    output: "output/sfs_data.sqlite3",
+    threads: 64
+    params:
+        nreps=expand("{nreps}", nreps=config["nreps"]),
+        popsize=expand("{popsize}", popsize=config["popsize"]),
+        rhos=expand("{rhos}", rhos=config["rhos"]),
+        alphas=expand("{alphas}", alphas=config["alphas"]),
+        nsam=expand("{nsam}", nsam=config["nsam"]),
+    shell:
+        """
+        python3 testcode/classic_sweep.py --popsize {params.popsize} --nreps {params.nreps} --ncores {threads} --dbname output/sfs_data.sqlite3 --rhos {params.rhos} --alphas {params.alphas} --nsam {params.nsam}
+        """
