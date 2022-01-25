@@ -1,0 +1,5 @@
+nreps: 128
+popsize: 1000
+rhos: 10 100 1000
+alphas: 100 1000 10000
+nsam: 20
