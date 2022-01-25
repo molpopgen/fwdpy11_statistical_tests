@@ -103,7 +103,7 @@ def run_sfs(args):
 
 def run_windowed_variation(args):
     tag = set_tag(args)
-    setup_logging("hard_sweeps_windowed_variation.txt")
+    setup_logging("hard_sweeps_windowed_variation_logfile.txt")
     logging.info(
         f"Building temporary docker image hard_sweeps_windowed_variation:{tag}."
     )
@@ -173,7 +173,7 @@ def run_windowed_variation(args):
 
 def kim_stephan_fig4(args):
     tag = set_tag(args)
-    setup_logging("kim_stephan_fig4.txt")
+    setup_logging("kim_stephan_fig4_logfile.txt")
     logging.info(f"Building temporary docker image kim_stephan_fig4:{tag}.")
     output = subprocess.run(
         [
