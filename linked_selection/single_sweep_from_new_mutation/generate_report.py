@@ -74,7 +74,7 @@ def run_sfs(args):
             "--snakefile",
             "Snakefile.sfs",
             "--report",
-            '/mnt/sfs_report.html"',
+            '/mnt/hard_sweeps_sfs_report.html"',
         ]
     )
 
